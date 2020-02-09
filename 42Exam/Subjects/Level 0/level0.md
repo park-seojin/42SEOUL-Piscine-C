@@ -121,9 +121,9 @@ int		main(int ac, char **av)
 	i = 0;
 	if (ac > 1)
 	{
-		while (av[1][i])
+		while (av[ac - 1][i])
 		{
-			write(1, &av[1][i], 1);
+			write(1, &av[ac - 1][i], 1);
 			i++;
 		}
 	}

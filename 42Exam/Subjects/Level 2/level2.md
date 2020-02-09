@@ -163,9 +163,9 @@ int		ft_atoi(char *str)
 	while (str[i] == '\t' || str[i] == '\v' || str[i] == '\n'
 			|| str[i] == '\r' || str[i] == '\f' || str[i] == ' ')
 		i++;
-	if (str[i] == '-' || str[i] == '+')
+	while (str[i] == '-' || str[i] == '+')
 		if (str[i++] == '-')
-			sign = -1;
+			sign *= -1;
 	while (str[i] >= '0' && str[i] <= '9')
 		nbr = (nbr * 10) + (str[i++] - '0');
 	return (nbr * sign);
@@ -308,3 +308,273 @@ int main (int ac, char **av)
 }
 ```
 
+
+
+#### ft_strdup.c
+
+- Reproduce the behavior of the function strdup (man strdup).
+
+```c
+#include <stdlib.h>
+
+int				ft_strlen(char *src)
+{
+	int			i;
+
+	i = 0;
+	while (src[i])
+	{
+		i++;
+	}
+	return (i);
+}
+
+char			*ft_strdup(char *src)
+{
+	int			i;
+	char		*newstr;
+
+	newstr = (char*)malloc(ft_strlen(src) + 1);
+	if (newstr == NULL)
+		return (0);
+	i = 0;
+	while (src[i])
+	{
+		newstr[i] = src[i];
+		i++;
+	}
+	newstr[i] = '\0';
+	return (newstr);
+}
+```
+
+
+
+#### union.c
+
+Write a program that takes two strings and displays, without doubles, the
+characters that appear in either one of the strings.
+
+The display will be in the order characters appear in the command line, and
+will be followed by a \n.
+
+If the number of arguments is not 2, the program displays \n.
+
+아규먼트 2개 받아서, 앞에서 안나왔던 문자들만 출력하는 문제.
+
+```c
+Example:
+
+$>./union zpadinton "paqefwtdjetyiytjneytjoeyjnejeyj" | cat -e
+zpadintoqefwjy$
+$>./union ddf6vewg64f gtwthgdwthdwfteewhrtag6h4ffdhsd | cat -e
+df6vewg4thras$
+$>./union "rien" "cette phrase ne cache rien" | cat -e
+rienct phas$
+$>./union | cat -e
+$
+$>
+$>./union "rien" | cat -e
+$
+$>
+```
+
+```c
+#include <unistd.h>
+
+void	ft_comp(char *str, char *s1)
+{
+	int	i;
+
+	i = 0;
+	while (s1[i])
+	{
+		if (str[(unsigned int)s1[i]] == 0)
+		{
+			write(1, &s1[i], 1);
+			str[(unsigned int)s1[i] = 1;
+		}
+		i++;
+	}
+}
+
+void	ft_union(char *s1, char *s2)
+{
+	char	str[256] = {0};
+
+	ft_comp(str, s1);
+	ft_comp(str, s2);
+}
+
+int		main(int ac, char **av)
+{
+	if (ac == 3)
+		ft_union(av[1], av[2]);
+	write(1, "\n", 1);
+	return 0;
+}
+```
+
+**이전에 나왔던 문자인지 확인하는 알고리즘** 
+
+> 1.  str[255]라는 문자배열판 0으로 초기화 해서 만든다. 
+> 2. s1[i]의 값을 인덱스로하는 str배열에서 값이 0이면 출력한 뒤 값을 1로 바꾼다. (이미 등장한 문자는 flag를 달아놓는 개념)
+>    1. `str[(int)s1[i]`   >>  s[i] 은 문자니까 정수로 강제형변환을 시킨 뒤 그 정수를 새 문자배열판의 인덱스로 활용한다. 즉, a의 아스키값 97은, str[97]이 될 것이고 값은 기본 0, 이미 출력됐다면 1이 될 것.
+
+```c
+int		ft_compare(char *str, char c, int i)
+{
+	while(i >= 0)
+	{
+		i--;
+		if(str[i] == c)
+			return 1;
+	}
+	return 0;
+}
+```
+
+이 알고리즘도 좋다. 배열만 받는게 아니라 기준이 되는 문자까지 받은 뒤 뒤로 가면서 확인.
+
+
+
+wdmatch.c
+--------------------------------------------------------------------------------
+
+Write a program that takes two strings and checks whether it's possible to
+write the first string with characters from the second string, while respecting
+the order in which these characters appear in the second string.
+
+If it's possible, the program displays the string, followed by a \n, otherwise
+it simply displays a \n.
+
+If the number of arguments is not 2, the program displays a \n.
+
+```c
+Examples:
+
+$>./wdmatch "faya" "fgvvfdxcacpolhyghbreda" | cat -e
+faya$
+$>./wdmatch "faya" "fgvvfdxcacpolhyghbred" | cat -e
+$
+$>./wdmatch "quarante deux" "qfqfsudf arzgsayns tsregfdgs sjytdekuoixq " | cat -e
+quarante deux$
+$>./wdmatch "error" rrerrrfiiljdfxjyuifrrvcoojh | cat -e
+$
+$>./wdmatch | cat -e
+$
+```
+
+```c
+#include <unistd.h>
+
+void ft_wdmatch(char *a, char *b)
+{
+	int j = 0; // counter for second string
+	int i = 0; // counter for first string
+
+	while ((a[i] && b[j]) != 0)
+	{
+		if (a[i] == b[j]) // if char in both the strings are same then proceed further
+		{
+			i++;
+			j++;
+			if (a[i] == '\0') // check if we reached the end point of first string
+			{
+				while (*a) // print the whole string
+				{
+					write (1, a, 1);
+					a++;
+				}
+				return ;
+			}
+		}
+		else
+			j++;
+	}
+}
+
+int main (int ac, char **av) // main driver function
+{
+	if (ac == 3)
+	{
+		ft_wdmatch(av[1], av[2]);
+	}
+	write (1, "\n", 1);
+	return (0);
+}
+
+```
+
+> a[i]이 b에 있는지만 체크 -> 있으면 둘다 ++ 없으면 b만 ++
+>
+> a[i]가 b가 끝날때까지 없으면 
+
+#### Last_word.c
+
+Write a program that takes a string and displays its last word followed by a \n.
+
+A word is a section of string delimited by spaces/tabs or by the start/end of
+the string.
+
+If the number of parameters is not 1, or there are no words, display a newline.
+
+```c
+Example:
+
+$> ./last_word "FOR PONY" | cat -e
+PONY$
+$> ./last_word "this        ...       is sparta, then again, maybe    not" | cat -e
+not$
+$> ./last_word "   " | cat -e
+$
+$> ./last_word "a" "b" | cat -e
+$
+$> ./last_word "  lorem,ipsum  " | cat -e
+lorem,ipsum$
+$>
+```
+
+```c
+#include <unistd.h>
+
+int		is_space(char c)
+{
+	if (c == '\t' || c == ' ')
+		return (1);
+	return (0);
+}
+
+int		main(int ac, char **av)
+{
+	int i;
+
+	i = 0;
+	if (ac == 2)
+	{
+		while (av[1][i])
+			i++;
+		i--;
+		while (is_space(av[1][i]) == 1)
+			i--;
+		while (av[1][i] && is_space(av[1][i]) == 0)
+			i--;
+		i++;
+		while (av[1][i] && (is_space(av[1][i]) == 0))
+		{
+			write(1, &av[1][i], 1);
+			i++;
+		}
+	}
+	write(1, "\n", 1);
+	return (0);
+}
+```
+
+> 1. 문자열 끝까지 뒤로 감
+> 2. i--; (널문자 제외)
+> 3. 공백이 아닐때까지 앞으로 옴
+> 4. 공백이 올때까지 앞으로 옴 
+>    1. -> `av(1)(i) != '\0' 이면서 공백이 아닌 동안 i--;` 안 그러면 배열 밖으로까지 뒤로 가게돼서 쓰레기 값을 출력하게 된다.
+> 5. i++; (문자부터 시작)
+> 6. 다시 뒤로 가면서 공백 전까지 출력
